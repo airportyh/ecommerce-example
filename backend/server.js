@@ -115,6 +115,42 @@ app.post('/api/user/login', (req, resp, next) => {
     .catch(next);
 });
 
+function respondUnauthorized(resp) {
+  resp.status(403);
+  resp.json({
+    message: 'Unauthorized'
+  });
+}
+
+app.use(function authorization(req, resp, next) {
+  let token = req.body.token;
+  if (!token) {
+    respondUnauthorized(resp);
+    return;
+  }
+  db.oneOrNone(`select * from login_session where token = $1`, token)
+    .then(loginSession => {
+      if (!loginSession) {
+        respondUnauthorized(resp);
+        return;
+      }
+      req.loginSession = loginSession;
+      next();
+    })
+    .catch(next);
+});
+
+app.post('/api/shopping_cart', (req, resp, next) => {
+  let productId = req.body.product_id;
+  let customerId = req.loginSession.customer_id;
+  db.one(`
+    insert into product_in_shopping_cart values
+    (default, $1, $2) returning *
+    `, [productId, customerId])
+    .then(data => resp.json(data))
+    .catch(next);
+});
+
 app.use((err, req, resp, next) => {
   resp.status(500);
   resp.json({
