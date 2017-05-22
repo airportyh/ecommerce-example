@@ -1,6 +1,7 @@
 import React from 'react';
 import * as ReactRedux from 'react-redux';
 import * as actions from './ProductList.actions';
+import { Link } from 'react-router';
 
 class ProductList extends React.Component {
   componentDidMount() {
@@ -13,10 +14,13 @@ class ProductList extends React.Component {
         <div className="product-list">
           {
             this.props.products.map(prod =>
-              <img
+              <Link to={'/product/' + prod.id}
                 key={prod.id}
-                src={'./images/'  + prod.image_path}
-                alt={prod.name} width="300"/>
+                >
+                <img
+                  src={'./images/'  + prod.image_path}
+                  alt={prod.name} width="300"/>
+              </Link>
             )
           }
         </div>

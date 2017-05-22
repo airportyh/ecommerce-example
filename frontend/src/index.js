@@ -14,9 +14,18 @@ import { Router, Route, Link, IndexLink, IndexRoute, hashHistory } from 'react-r
 // import all components and their reducers here
 import ProductListContainer from './product-list/ProductList';
 import productListReducer from './product-list/ProductList.reducer';
+import ProductDetailContainer from './product-detail/ProductDetail.js';
+import productDetailReducer from './product-detail/ProductDetail.reducer';
+import signUpReducer from './sign-up/SignUp.reducer';
+import SignUpContainer from './sign-up/SignUp';
+import LoginContainer from './login/Login';
+import loginReducer from './login/Login.reducer';
 
 const reducer = Redux.combineReducers({
-  productList: productListReducer
+  productList: productListReducer,
+  productDetail: productDetailReducer,
+  signUp: signUpReducer,
+  login: loginReducer
 });
 
 const store = Redux.createStore(
@@ -26,11 +35,25 @@ const store = Redux.createStore(
 );
 
 class AppLayout extends React.Component {
+  logout(event) {
+    event.preventDefault();
+    this.props.logout();
+  }
   render() {
+    let loggedIn = !!this.props.loginInfo;
     return (
       <div>
         <ul className="nav">
           <li><IndexLink to="/" activeClassName="active">All Products</IndexLink></li>
+          {!loggedIn ?
+            [<li key="signup"><Link to="/signup">Sign Up</Link></li>,
+            <li key="login"><Link to="/login">Login</Link></li>] :
+            <li>
+              Welcome, {this.props.loginInfo.first_name}!
+              &nbsp;
+              <a href="#" onClick={event => this.logout(event)}>Logout</a>
+            </li>
+          }
         </ul>
         {this.props.children}
       </div>
@@ -38,11 +61,23 @@ class AppLayout extends React.Component {
   }
 }
 
+const AppLayoutContainer = ReactRedux.connect(
+  state => ({
+    loginInfo: state.login.loginInfo
+  }),
+  { logout: () => ({ type: 'logout' })}
+)(AppLayout);
+
 ReactDOM.render(
   <ReactRedux.Provider store={store}>
     <Router history={hashHistory}>
-      <Route path="/" component={AppLayout}>
+      <Route path="/" component={AppLayoutContainer}>
         <IndexRoute component={ProductListContainer}/>
+        <Route path="/product/:id"    component={ProductDetailContainer}/>
+        <Route path="/signup"
+          component={SignUpContainer}/>
+        <Route path="/login"
+          component={LoginContainer}/>
       </Route>
     </Router>
   </ReactRedux.Provider>,

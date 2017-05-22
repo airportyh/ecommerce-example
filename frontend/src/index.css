@@ -35,3 +35,8 @@ ul.nav:after {
   float: left;
   width: 33.3333%;
 }
+
+.product-detail img {
+  float: left;
+  margin-right: 2em;
+}
