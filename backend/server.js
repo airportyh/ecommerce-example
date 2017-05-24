@@ -123,7 +123,7 @@ function respondUnauthorized(resp) {
 }
 
 app.use(function authorization(req, resp, next) {
-  let token = req.body.token;
+  let token = req.query.token || req.body.token;
   if (!token) {
     respondUnauthorized(resp);
     return;
@@ -147,6 +147,21 @@ app.post('/api/shopping_cart', (req, resp, next) => {
     insert into product_in_shopping_cart values
     (default, $1, $2) returning *
     `, [productId, customerId])
+    .then(data => resp.json(data))
+    .catch(next);
+});
+
+app.get('/api/shopping_cart', (req, resp, next) => {
+  let customerId = req.loginSession.customer_id;
+  db.any(`
+    select
+      product_in_shopping_cart.id as item_id,
+      product.*
+    from
+      product_in_shopping_cart
+    inner join
+      product on product.id = product_in_shopping_cart.product_id
+    where customer_id = $1`, customerId)
     .then(data => resp.json(data))
     .catch(next);
 });

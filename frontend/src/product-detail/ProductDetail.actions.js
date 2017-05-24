@@ -21,3 +21,30 @@ export function getProductDetail(id) {
   };
   return asyncAction;
 }
+
+export function addToCart(productId, token) {
+  return (dispatch) => {
+    $.ajax({
+      method: 'POST',
+      url: 'http://localhost:4000/api/shopping_cart',
+      data: JSON.stringify({
+        token: token,
+        product_id: productId
+      }),
+      contentType: 'application/json'
+    })
+    .then(data => {
+      dispatch({
+        type: 'add-to-cart-success',
+        data: data
+      });
+    })
+    .catch(resp => {
+      let error = resp.responseJSON && resp.responseJSON.message || 'Did not work';
+      dispatch({
+        type: 'add-to-cart-error',
+        error: error
+      });
+    })
+  };
+}

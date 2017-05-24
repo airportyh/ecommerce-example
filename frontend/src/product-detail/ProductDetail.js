@@ -25,14 +25,26 @@ class ProductDetail extends React.Component {
         width="300"/>
         <p>{product.description}</p>
         <p>Price: ${product.price}</p>
-        <button>Add to Cart</button>
+        <button onClick={() => this.props.addToCart(
+          product.id,
+          this.props.auth_token)}>
+          Add to Cart
+        </button>
+        {
+          this.props.addedToCart ?
+          <label>Added to cart!</label> :
+          null
+        }
       </div>
     );
   }
 }
 
 const ProductDetailContainer = ReactRedux.connect(
-  state => state.productDetail,
+  state => Object.assign({},
+    state.productDetail,
+    {auth_token: state.login.loginInfo && state.login.loginInfo.auth_token}
+  ),
   actions
 )(ProductDetail);
 
